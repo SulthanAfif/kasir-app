@@ -1,207 +1,133 @@
-# KasirApp
+# Kasir App
 
-Sistem **Point of Sale (POS) / Kasir** berbasis Laravel untuk toko, warung, minimarket, dan multi-cabang.
+Aplikasi kasir berbasis web untuk membantu toko mengelola penjualan, stok, pembelian, pelanggan, pemasok, dan laporan dari satu tempat. Aplikasi mendukung beberapa cabang serta membedakan akses admin dan kasir.
 
-Siap dipakai di lingkungan nyata: shift kasir, stok, pembelian ke supplier, laporan, notifikasi, dan API mobile.
+## Latar Belakang
 
----
+Operasional toko mencakup banyak data dan kegiatan harian. Jika pencatatan penjualan, persediaan, dan pembelian dilakukan secara terpisah, pemilik dan staf dapat mengalami beberapa kendala:
+
+- **Transaksi sulit dipantau.** Pencatatan manual membuat pencarian riwayat transaksi dan pembuatan laporan memerlukan waktu.
+- **Stok tidak selalu akurat.** Perubahan stok akibat penjualan, barang masuk, atau penyesuaian perlu dicatat secara konsisten.
+- **Data operasional tersebar.** Informasi produk, kategori, pelanggan, pemasok, serta cabang lebih sulit dikelola ketika berada di tempat berbeda.
+- **Proses kerja perlu dibatasi sesuai peran.** Admin mengelola konfigurasi dan pengguna, sedangkan kasir berfokus pada transaksi dan operasional toko.
+
+Kasir App menyatukan kegiatan tersebut dalam satu aplikasi. Data dapat dikelola dari dashboard, transaksi tercatat beserta detailnya, dan laporan dapat diekspor sesuai kebutuhan.
 
 ## Fitur
 
-### Operasional
-- Login dengan role **Admin** & **Kasir**
-- **Shift kasir** — buka/tutup shift, modal awal, hitung uang laci, selisih kas
-- **POS** — cari/scan barcode, keranjang, diskon, PPN, metode bayar (tunai, transfer, QRIS, lainnya)
-- **Pelanggan** — master data + pencarian di kasir
-- **Transaksi** — riwayat, detail, cetak struk, **refund** (stok dikembalikan)
-
-### Inventori
-- Produk & kategori (CRUD, gambar, soft delete, stok minimal)
-- **Mutasi stok** — masuk, keluar, penyesuaian (stock opname) + audit trail
-- **Supplier** & **Pembelian (PO)** — draft / terima barang / batal, stok otomatis update
-
-### Multi Cabang
-- Master cabang
-- User dan produk dapat dikaitkan ke cabang
-
-### Laporan & Notifikasi
-- Dashboard statistik + grafik 7 hari + alert stok menipis
-- Laporan penjualan (filter tanggal, top produk, metode bayar)
-- **Export CSV** & **Export PDF**
-- Notifikasi in-app (stok menipis)
-
 ### Admin
-- Pengaturan toko (nama, alamat, telepon, PPN, footer struk)
-- Manajemen pengguna
 
-### API Mobile
-| Method | Endpoint | Keterangan |
-|--------|----------|------------|
-| POST | `/api/login` | Login, dapat token |
-| GET | `/api/me` | Profil user |
-| POST | `/api/logout` | Logout |
-| GET | `/api/products?q=` | Daftar/cari produk |
-| POST | `/api/checkout` | Checkout transaksi |
-| GET | `/api/shifts/current` | Shift aktif |
+- Dashboard ringkasan operasional.
+- Kelola pengguna dan cabang.
+- Kelola kategori, produk, pelanggan, dan pemasok.
+- Kelola stok serta pembelian barang.
+- Lihat dan kelola transaksi, termasuk proses pengembalian dana.
+- Lihat laporan dan ekspor laporan ke CSV atau PDF.
+- Atur informasi toko, tarif pajak, mata uang, dan catatan struk.
 
-Header: `Authorization: Bearer {token}`
+### Kasir
 
----
+- Buka dan tutup shift.
+- Cari produk dan pelanggan saat melakukan checkout.
+- Catat transaksi penjualan dan lihat struk.
+- Lihat transaksi, stok, dan laporan sesuai akses yang diberikan.
+- Terima notifikasi operasional.
 
-## Stack
+### API
 
-- PHP 8.2+ / Laravel 11+
-- Bootstrap 5.3 + Bootstrap Icons
-- Chart.js
-- SQLite (default) atau MySQL/MariaDB
+- Login menggunakan token, melihat profil, logout, melihat produk, checkout, dan melihat shift aktif tersedia melalui API.
 
----
+## Teknologi
 
-## Instalasi
+- PHP dan Laravel
+- Blade, Vite, dan JavaScript
+- SQLite secara default; MySQL dapat digunakan melalui konfigurasi database Laravel
+- API berbasis token untuk kebutuhan klien POS
 
-### Requirement
-- PHP 8.2+ dengan ekstensi: `mbstring`, `xml`, `curl`, `zip`, `sqlite3` atau `pdo_mysql`, `gd`, `bcmath`
+## Persyaratan
+
+- PHP sesuai versi yang disyaratkan oleh `composer.json` dan ekstensi Laravel yang diperlukan
 - Composer
-- Node.js (opsional, jika build asset Vite)
+- Node.js dan npm
+- SQLite atau MySQL
 
-### Langkah
+## Menjalankan Aplikasi
 
-```bash
-# Clone
-git clone <url-repo-anda> kasir-app
+Clone repository dan pasang dependensi:
+
+```sh
+git clone <URL-REPOSITORY> kasir-app
 cd kasir-app
-
-# Dependency
 composer install
+npm install
+```
 
-# Environment
+Salin konfigurasi contoh jika `.env` belum tersedia, lalu buat application key:
+
+```sh
 cp .env.example .env
 php artisan key:generate
+```
 
-# Database — pilih salah satu:
+Di Windows PowerShell, gunakan `Copy-Item .env.example .env` sebagai pengganti `cp`. Jika `.env` sudah ada, jangan menimpanya. Jalankan `php artisan key:generate` hanya bila `APP_KEY` belum terisi.
 
-# A) SQLite (cepat untuk development)
-touch database/database.sqlite
-# pastikan di .env: DB_CONNECTION=sqlite
+Konfigurasi bawaan memakai SQLite. Pastikan file database tersedia, kemudian jalankan migrasi dan data contoh:
 
-# B) MySQL (disarankan production)
-# Edit .env:
-# DB_CONNECTION=mysql
-# DB_HOST=127.0.0.1
-# DB_PORT=3306
-# DB_DATABASE=kasir
-# DB_USERNAME=root
-# DB_PASSWORD=secret
-
-# Migrasi + data contoh
+```sh
 php artisan migrate --seed
+```
 
-# Storage untuk gambar produk
-php artisan storage:link
+Untuk memakai MySQL, buat database dan sesuaikan variabel `DB_*` di `.env`, lalu jalankan perintah migrasi dan seeder yang sama.
 
-# Jalankan
+Build aset dan jalankan aplikasi:
+
+```sh
+npm run build
 php artisan serve
 ```
 
-Buka: [http://localhost:8000](http://localhost:8000)
+Buka `http://127.0.0.1:8000`. Untuk pengembangan frontend, jalankan `npm run dev` di terminal terpisah.
 
-### Akun demo
+## Akun Demo
 
-| Role  | Email             | Password  |
-|-------|-------------------|-----------|
-| Admin | admin@kasir.com   | password  |
-| Kasir | kasir@kasir.com   | password  |
+Seeder membuat akun berikut dengan kata sandi awal `password`:
 
----
+| Peran | Email |
+| --- | --- |
+| Admin | `admin@kasir.com` |
+| Kasir | `kasir@kasir.com` |
 
-## Cara pakai (ringkas)
+Seeder juga menambahkan contoh cabang, kategori, produk, pelanggan, pemasok, dan pengaturan toko. Ganti kata sandi demo sebelum aplikasi digunakan di lingkungan nyata.
 
-### Kasir harian
-1. Login sebagai **Kasir**
-2. **Shift Kasir** → Buka Shift (isi modal awal)
-3. **Kasir / POS** → scan/pilih produk → bayar → cetak struk
-4. Akhir hari → **Tutup Shift** (hitung uang di laci)
+## Konfigurasi
 
-### Pembelian
-1. **Supplier** → tambah supplier
-2. **Pembelian** → buat PO → centang *terima sekarang* atau Terima nanti
-3. Stok produk otomatis bertambah saat diterima
+Pengaturan dasar aplikasi berada di `.env`, termasuk:
 
-### Admin
-- **Pengaturan** → nama toko, PPN, footer struk
-- **Cabang**, **Pengguna**, **Laporan** (+ export CSV/PDF)
-- **Notifikasi** → pantau stok menipis
+- `APP_NAME`, `APP_ENV`, `APP_DEBUG`, `APP_URL` untuk identitas dan mode aplikasi.
+- `DB_CONNECTION` dan variabel `DB_*` untuk koneksi database.
+- `SESSION_DRIVER`, `CACHE_STORE`, dan `QUEUE_CONNECTION` untuk penyimpanan sesi, cache, dan antrean.
 
----
+Pengaturan toko seperti nama, alamat, nomor telepon, email, tarif pajak, mata uang, dan footer struk dikelola melalui halaman **Pengaturan** dan disimpan di database. Jangan menyimpan kredensial produksi di repository.
 
-## Struktur folder penting
+## Perintah Berguna
 
-```
-app/
-  Http/Controllers/     # Web + Api/
-  Models/
-  Http/Middleware/      # Admin, ApiToken
-database/
-  migrations/
-  seeders/
-resources/views/        # Blade UI
-routes/
-  web.php
-  api.php
+```sh
+php artisan serve       # Jalankan server lokal
+npm run dev             # Jalankan Vite dalam mode pengembangan
+npm run build           # Build aset frontend
+php artisan migrate     # Jalankan migrasi database
+php artisan db:seed     # Isi data contoh
+php artisan test        # Jalankan test suite
 ```
 
----
+## Deployment
 
-## Production checklist
-
-- [ ] Ganti password akun default
-- [ ] `APP_ENV=production` dan `APP_DEBUG=false`
-- [ ] Gunakan MySQL/MariaDB (bukan SQLite)
-- [ ] HTTPS (SSL)
-- [ ] Backup database rutin
-- [ ] `php artisan config:cache && php artisan route:cache && php artisan view:cache`
-- [ ] `php artisan storage:link`
-- [ ] Sesuaikan pengaturan toko
-
-```bash
-composer install --optimize-autoloader --no-dev
-php artisan config:cache
-php artisan route:cache
-php artisan view:cache
-```
+- Gunakan `APP_ENV=production`, `APP_DEBUG=false`, dan `APP_URL` yang sesuai.
+- Arahkan document root web server ke direktori `public`.
+- Pastikan `storage` dan `bootstrap/cache` dapat ditulis oleh web server.
+- Gunakan kredensial database dan kata sandi yang kuat untuk semua akun.
+- Build aset frontend dengan `npm run build` sebelum deployment.
 
 ---
 
-## Contoh API
-
-```bash
-# Login
-curl -s -X POST http://localhost:8000/api/login \
-  -H "Content-Type: application/json" \
-  -d '{"email":"kasir@kasir.com","password":"password"}'
-
-# Produk
-curl -s http://localhost:8000/api/products \
-  -H "Authorization: Bearer YOUR_TOKEN"
-
-# Checkout
-curl -s -X POST http://localhost:8000/api/checkout \
-  -H "Authorization: Bearer YOUR_TOKEN" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "items":[{"product_id":1,"quantity":2}],
-    "paid":50000,
-    "payment_method":"cash"
-  }'
-```
-
----
-
-## Lisensi
-
-Proyek ini dibuat untuk pembelajaran dan penggunaan operasional toko.  
-Silakan modifikasi sesuai kebutuhan.
-
----
-
-**KasirApp** — dari kasir harian sampai multi-cabang & API mobile.
+Kasir App — pengelolaan penjualan dan operasional toko dalam satu aplikasi.
